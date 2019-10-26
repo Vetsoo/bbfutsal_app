@@ -58,37 +58,69 @@ class _ListPageState extends State<ListPage> {
       ],
     );
 
-    TableRow _buildTableRow(String listOfNames) => TableRow(
-          children: listOfNames.split(',').map((name) {
-            return Container(
-              alignment: Alignment.center,
-              child: Text(name, style: TextStyle(fontSize: 20.0)),
-              padding: EdgeInsets.all(8.0),
-            );
-          }).toList(),
+    TableRow _buildTableRow(
+            String rank, String name, String points, String played) =>
+        TableRow(
+          children: [
+            Container(
+                margin: EdgeInsets.all(2),
+                color: Color.fromRGBO(58, 66, 86, 1.0),
+                width: 5.0,
+                child: Center(
+                    child: Text(rank,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white, fontSize: 18)))),
+            Container(
+                margin: EdgeInsets.all(2),
+                color: Color.fromRGBO(58, 66, 86, 1.0),
+                width: 5.0,
+                child: Center(
+                    child: Text(name,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white, fontSize: 18)))),
+            Container(
+                margin: EdgeInsets.all(2),
+                color: Color.fromRGBO(58, 66, 86, 1.0),
+                width: 5.0,
+                child: Center(
+                    child: Text(points,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white, fontSize: 18)))),
+            Container(
+                margin: EdgeInsets.all(2),
+                color: Color.fromRGBO(58, 66, 86, 1.0),
+                width: 5.0,
+                child: Center(
+                    child: Text(played,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white, fontSize: 18))))
+          ],
         );
 
-    final makeBody = Table(
-      defaultColumnWidth: FixedColumnWidth(150.0),
-      border: TableBorder(
-        horizontalInside: BorderSide(
-          color: Colors.black,
-          style: BorderStyle.solid,
-          width: 1.0,
-        ),
-        verticalInside: BorderSide(
-          color: Colors.black,
-          style: BorderStyle.solid,
-          width: 1.0,
-        ),
-      ),
-      children: [
-        _buildTableRow("Inducesmile.com, Google.com, Flutter.dev"),
-        _buildTableRow("Inducesmile.com, Google.com, Flutter.dev"),
-        _buildTableRow("Inducesmile.com, Google.com, Flutter.dev"),
-        _buildTableRow("Inducesmile.com, Google.com, Flutter.dev"),
-      ],
-    );
+    final makeDataColumns = [
+      DataColumn(label: Text('#'), tooltip: 'Ranking'),
+      DataColumn(label: Text('Name'), tooltip: 'Club name'),
+      DataColumn(label: Text('P'), tooltip: 'Points'),
+      DataColumn(label: Text('GP'), tooltip: 'Games played'),
+    ];
+
+    List<DataCell> makeDataCells(String rank,String name,String points,String played) => [
+      DataCell(Text(rank)),
+      DataCell(Text(name)),
+      DataCell(Text(points)),
+      DataCell(Text(played)),
+    ];
+
+    List<DataRow> makeDataRows(String rank, String name, String points, String played) => [
+      DataRow(cells: makeDataCells(rank, name, points, played)),
+      DataRow(cells: makeDataCells(rank, name, points, played)),
+      DataRow(cells: makeDataCells(rank, name, points, played))
+    ];
+
+    final makeBody = DataTable(
+      columns: makeDataColumns,
+      rows: makeDataRows("#1", "Animo", "24", "3"),
+      );
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),

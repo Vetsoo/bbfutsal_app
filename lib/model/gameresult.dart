@@ -8,10 +8,6 @@ class GameResult {
 
   GameResult({this.date, this.home, this.visitors, this.score});
 
-  List<String> get splittedDate {
-    //return date.split("/");
-  }
-
   factory GameResult.fromJson(Map<String, dynamic> json) {
     return GameResult(
       date: new DateFormat('dd/MM/yyyy').parse(json['date']),
