@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:bbfutsal_app/model/gameresult.dart';
+import 'package:bbfutsal_app/ranking_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
 
 void main() => runApp(new MyApp());
 
@@ -50,7 +50,12 @@ class _ListPageState extends State<ListPage> {
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.list),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RankingPage()),
+            );
+          },
         )
       ],
     );
@@ -66,14 +71,16 @@ class _ListPageState extends State<ListPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  new DateFormat('dd').format(gameResult.date), //splittedDate[0],
+                  new DateFormat('dd')
+                      .format(gameResult.date), //splittedDate[0],
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.normal),
                 ),
                 Text(
-                  new DateFormat('MM').format(gameResult.date), //splittedDate[1],
+                  new DateFormat('MM')
+                      .format(gameResult.date), //splittedDate[1],
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -138,9 +145,36 @@ class _ListPageState extends State<ListPage> {
     );
 
     return Scaffold(
-        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-        appBar: topAppBar,
-        body: makeBody);
+      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+      appBar: topAppBar,
+      body: makeBody,
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            ListTile(
+              title: Text('Results'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('Ranking'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RankingPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -150,7 +184,15 @@ Future<List<GameResult>> fetchGameResults() async {
   if (response.statusCode == 200) {
     // If server returns an OK response, parse the JSON.
     List responseJson = json.decode(response.body);
-    return responseJson.map((r) => GameResult.fromJson(r)).toList();
+    var gameResults = responseJson.map((r) => GameResult.fromJson(r)).toList();
+    gameResults.sort((a, b) {
+      var adate = a.date;
+      var bdate = b.date;
+      return bdate.compareTo(
+          adate); //to get the order other way just switch `adate & bdate`
+    });
+
+    return gameResults;
   } else {
     // If that response was not OK, throw an error.
     throw Exception('Failed to load game results.');
