@@ -44,10 +44,9 @@ class _ListPageState extends State<ListPage> {
   @override
   Widget build(BuildContext context) {
     final topAppBar = AppBar(
-      elevation: 0.1,
-      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      title: Text(widget.title)
-    );
+        elevation: 0.1,
+        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+        title: Text(widget.title));
 
     ListTile makeListTile(GameResult gameResult) => ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -122,16 +121,43 @@ class _ListPageState extends State<ListPage> {
           ),
         );
 
+        var dropdownValue = 'One';
+
     final makeBody = Container(
-      child: ListView.builder(
+        child: Column(children: [
+      DropdownButton<String>(
+        value: dropdownValue,
+        icon: Icon(Icons.arrow_downward),
+        iconSize: 24,
+        elevation: 16,
+        onChanged: (String newValue) {
+          setState(() {
+            dropdownValue = newValue;
+          });
+        },
+        items: <String>['One', 'Two', 'Free', 'Four']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.normal),
+              ));
+        }).toList(),
+      ),
+      Expanded(
+          child: ListView.builder(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         itemCount: gameResults.length,
         itemBuilder: (BuildContext context, int index) {
           return makeCard(gameResults[index]);
         },
-      ),
-    );
+      ))
+    ]));
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
