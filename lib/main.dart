@@ -46,18 +46,7 @@ class _ListPageState extends State<ListPage> {
     final topAppBar = AppBar(
       elevation: 0.1,
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      title: Text(widget.title),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.list),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => RankingPage()),
-            );
-          },
-        )
-      ],
+      title: Text(widget.title)
     );
 
     ListTile makeListTile(GameResult gameResult) => ListTile(
