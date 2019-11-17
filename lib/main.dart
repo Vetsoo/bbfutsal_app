@@ -40,7 +40,7 @@ class _ListPageState extends State<ListPage> {
 
   @override
   void initState() {
-    fetchGameResults("2B").then((result) {
+    fetchGameResults(dropdownValue).then((result) {
       setState(() {
         gameResults = result;
       });

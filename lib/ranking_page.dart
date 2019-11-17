@@ -15,7 +15,9 @@ class RankingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'KZVB App',
-      theme: new ThemeData(primaryColor: Color.fromRGBO(58, 66, 86, 1.0)),
+      theme: new ThemeData(
+          primaryColor: Color.fromRGBO(58, 66, 86, 1.0),
+          canvasColor: Color.fromRGBO(58, 66, 86, 1.0)),
       home: new ListPage(title: 'Ranking'),
     );
   }
@@ -32,10 +34,11 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   List<Ranking> rankings;
+  var dropdownValue = '2B';
 
   @override
   void initState() {
-    fetchRanking().then((result) {
+    fetchRanking(dropdownValue).then((result) {
       setState(() {
         rankings = result;
       });
@@ -46,10 +49,9 @@ class _ListPageState extends State<ListPage> {
   @override
   Widget build(BuildContext context) {
     final topAppBar = AppBar(
-      elevation: 0.1,
-      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      title: Text(widget.title)
-    );
+        elevation: 0.1,
+        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+        title: Text(widget.title));
 
     final makeDataColumns = [
       DataColumn(
@@ -109,7 +111,47 @@ class _ListPageState extends State<ListPage> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
       appBar: topAppBar,
-      body: makeBody,
+      body: Container(
+          child: Column(children: [
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          Container(
+              width: 100,
+              child: Text(
+                "Division:",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.normal),
+              )),
+          DropdownButton<String>(
+            value: dropdownValue,
+            icon: Icon(Icons.arrow_downward),
+            iconSize: 24,
+            elevation: 16,
+            onChanged: (String newValue) {
+              fetchRanking(newValue).then((result) {
+                setState(() {
+                  rankings = result;
+                  dropdownValue = newValue;
+                });
+              });
+            },
+            items: <String>['01', '2A', '2B', '3A', '3B', '3C']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.normal),
+                  ));
+            }).toList(),
+          )
+        ]),
+        Expanded(child: SingleChildScrollView(child: makeBody))
+      ])),
       drawer: Drawer(
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical
@@ -140,10 +182,12 @@ class _ListPageState extends State<ListPage> {
   }
 }
 
-Future<List<Ranking>> fetchRanking() async {
+Future<List<Ranking>> fetchRanking(String division) async {
   var secret = await secretFuture;
   final response = await http.get(
-      'https://kzvb-scraper.azurewebsites.net/api/ranking?code=' + secret.rankingEndpointKey + '&division=2B');
+      'https://kzvb-scraper.azurewebsites.net/api/ranking?code=' +
+          secret.rankingEndpointKey +
+          '&division=' + division);
   if (response.statusCode == 200) {
     // If server returns an OK response, parse the JSON.
     List responseJson = json.decode(response.body);
