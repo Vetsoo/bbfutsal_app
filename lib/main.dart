@@ -13,7 +13,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'KZVB App  ',
-      theme: new ThemeData(primaryColor: Color.fromRGBO(58, 66, 86, 1.0)),
+      theme: new ThemeData(
+          primaryColor: Color.fromRGBO(58, 66, 86, 1.0),
+          canvasColor: Color.fromRGBO(58, 66, 86, 1.0)),
       home: new ListPage(title: 'Results'),
     );
   }
@@ -30,10 +32,11 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   List<GameResult> gameResults;
+  var dropdownValue = '2B';
 
   @override
   void initState() {
-    fetchGameResults().then((result) {
+    fetchGameResults("2B").then((result) {
       setState(() {
         gameResults = result;
       });
@@ -121,33 +124,45 @@ class _ListPageState extends State<ListPage> {
           ),
         );
 
-        var dropdownValue = 'One';
-
     final makeBody = Container(
         child: Column(children: [
-      DropdownButton<String>(
-        value: dropdownValue,
-        icon: Icon(Icons.arrow_downward),
-        iconSize: 24,
-        elevation: 16,
-        onChanged: (String newValue) {
-          setState(() {
-            dropdownValue = newValue;
-          });
-        },
-        items: <String>['One', 'Two', 'Free', 'Four']
-            .map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                value,
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 24,
-                    fontWeight: FontWeight.normal),
-              ));
-        }).toList(),
-      ),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+        Container(
+            width: 100,
+            child: Text(
+              "Division:",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.normal),
+            )),
+        DropdownButton<String>(
+          value: dropdownValue,
+          icon: Icon(Icons.arrow_downward),
+          iconSize: 24,
+          elevation: 16,
+          onChanged: (String newValue) {
+            fetchGameResults(newValue).then((result) {
+              setState(() {
+                gameResults = result;
+                dropdownValue = newValue;
+              });
+            });           
+          },
+          items: <String>['01', '2A', '2B', '3A', '3B', '3C']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.normal),
+                ));
+          }).toList(),
+        )
+      ]),
       Expanded(
           child: ListView.builder(
         scrollDirection: Axis.vertical,
@@ -193,9 +208,10 @@ class _ListPageState extends State<ListPage> {
   }
 }
 
-Future<List<GameResult>> fetchGameResults() async {
+Future<List<GameResult>> fetchGameResults(String division) async {
   final response = await http.get(
-      'https://kzvb-scraper.azurewebsites.net/api/results?code=V4HVAE88k211oy4rXrVdtaayBXMYGcyIi/6SYduVKY876q43b6Ekeg==&division=2B');
+      'https://kzvb-scraper.azurewebsites.net/api/results?code=V4HVAE88k211oy4rXrVdtaayBXMYGcyIi/6SYduVKY876q43b6Ekeg==&division=' +
+          division);
   if (response.statusCode == 200) {
     // If server returns an OK response, parse the JSON.
     List responseJson = json.decode(response.body);
