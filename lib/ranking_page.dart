@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'main.dart';
+import 'util/secret.dart';
+import 'util/secret_loader.dart';
+
+Future<Secret> secretFuture = SecretLoader(secretPath: "secrets.json").load();
 
 class RankingPage extends StatelessWidget {
   // This widget is the root of your application.
@@ -137,8 +141,9 @@ class _ListPageState extends State<ListPage> {
 }
 
 Future<List<Ranking>> fetchRanking() async {
+  var secret = await secretFuture;
   final response = await http.get(
-      'https://kzvb-scraper.azurewebsites.net/api/ranking?code=OPJPQ6c73mvGs/ZHCW/6dkGDzjimujP79YbcbDFnsbmwZPxESii2mA==&division=2B');
+      'https://kzvb-scraper.azurewebsites.net/api/ranking?code=' + secret.rankingEndpointKey + '&division=2B');
   if (response.statusCode == 200) {
     // If server returns an OK response, parse the JSON.
     List responseJson = json.decode(response.body);

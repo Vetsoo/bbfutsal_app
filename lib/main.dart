@@ -4,8 +4,12 @@ import 'package:bbfutsal_app/ranking_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'util/secret.dart';
+import 'util/secret_loader.dart';
 
 void main() => runApp(new MyApp());
+
+Future<Secret> secretFuture = SecretLoader(secretPath: "secrets.json").load();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -209,8 +213,9 @@ class _ListPageState extends State<ListPage> {
 }
 
 Future<List<GameResult>> fetchGameResults(String division) async {
+  var secret = await secretFuture;
   final response = await http.get(
-      'https://kzvb-scraper.azurewebsites.net/api/results?code=V4HVAE88k211oy4rXrVdtaayBXMYGcyIi/6SYduVKY876q43b6Ekeg==&division=' +
+      'https://kzvb-scraper.azurewebsites.net/api/results?code=' + secret.resultsEndpointKey + '&division=' +
           division);
   if (response.statusCode == 200) {
     // If server returns an OK response, parse the JSON.
