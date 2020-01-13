@@ -185,7 +185,7 @@ class _ListPageState extends State<ListPage> {
 Future<List<Ranking>> fetchRanking(String division) async {
   var secret = await secretFuture;
   final response = await http.get(
-      'https://kzvb-scraper.azurewebsites.net/api/ranking?code=' +
+      'https://kzvb-datascraper.azurewebsites.net/api/ranking?code=' +
           secret.rankingEndpointKey +
           '&division=' + division);
   if (response.statusCode == 200) {

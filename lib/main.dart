@@ -215,7 +215,7 @@ class _ListPageState extends State<ListPage> {
 Future<List<GameResult>> fetchGameResults(String division) async {
   var secret = await secretFuture;
   final response = await http.get(
-      'https://kzvb-scraper.azurewebsites.net/api/results?code=' + secret.resultsEndpointKey + '&division=' +
+      'https://kzvb-datascraper.azurewebsites.net/api/results?code=' + secret.resultsEndpointKey + '&division=' +
           division);
   if (response.statusCode == 200) {
     // If server returns an OK response, parse the JSON.
