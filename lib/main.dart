@@ -20,7 +20,8 @@ class MyApp extends StatelessWidget {
         theme: new ThemeData(primaryColor: Colors.deepOrange),
         home: DefaultTabController(
           length: 2,
-          child: Scaffold(
+          child: SafeArea(
+              child: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
                 tabs: <Widget>[Tab(text: "Results"), Tab(text: "Ranking")],
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
                 new RankingsList(title: 'Ranking'),
               ],
             ),
-          ),
+          )),
         ));
   }
 }
