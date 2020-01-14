@@ -1,5 +1,7 @@
+import 'package:intl/intl.dart';
+
 class Ranking {
-  int rank;
+  String rank;
   String name;
   String points;
   String played;
@@ -7,11 +9,15 @@ class Ranking {
   Ranking({this.rank, this.name, this.points, this.played});
 
   factory Ranking.fromJson(Map<String, dynamic> json) {
-    return Ranking(
-      rank: json['ranking'],
+    var ranking = Ranking(
+      rank: null,
       name: json['clubName'],
       points: json['points'],
       played: json['gamesPlayed'],
     );
+
+    var f = NumberFormat("00");
+    ranking.rank = f.format(json['ranking']);
+    return ranking;
   }
 }
