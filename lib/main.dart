@@ -49,6 +49,7 @@ class ResultsList extends StatefulWidget {
 
 class _ResultsListState extends State<ResultsList> {
   var defaultDivision = '2B';
+  var _gameResultsFuture;
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +135,9 @@ class _ResultsListState extends State<ResultsList> {
   }
 
   Future<List<GameResult>> fetchGameResults(String division) async {
+    if (_gameResultsFuture != null) {
+      return _gameResultsFuture;
+    }
     var secret = await secretFuture;
     final response = await http.get(
         'https://kzvb-datascraper.azurewebsites.net/api/results?code=' +
@@ -151,7 +155,7 @@ class _ResultsListState extends State<ResultsList> {
         return bdate.compareTo(
             adate); //to get the order other way just switch `adate & bdate`
       });
-
+      _gameResultsFuture = gameResults;
       return gameResults;
     } else {
       // If that response was not OK, throw an error.
