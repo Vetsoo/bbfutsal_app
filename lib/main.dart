@@ -1,158 +1,272 @@
 import 'dart:convert';
 import 'package:bbfutsal_app/model/gameresult.dart';
+import 'package:bbfutsal_app/model/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
+import 'util/secret.dart';
+import 'util/secret_loader.dart';
 
 void main() => runApp(new MyApp());
+
+Future<Secret> secretFuture = SecretLoader(secretPath: "secrets.json").load();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'KZVB App  ',
-      theme: new ThemeData(primaryColor: Color.fromRGBO(58, 66, 86, 1.0)),
-      home: new ListPage(title: 'Results'),
-    );
+        title: 'KZVB App',
+        theme: new ThemeData(primaryColor: Colors.deepOrange),
+        home: DefaultTabController(
+          length: 2,
+          child: SafeArea(
+              child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[Tab(text: "Results"), Tab(text: "Ranking")],
+              ),
+              title: Text("KZVB App"),
+            ),
+            body: TabBarView(
+              children: <Widget>[
+                new ResultsList(title: 'Results'),
+                new RankingsList(title: 'Ranking'),
+              ],
+            ),
+          )),
+        ));
   }
 }
 
-class ListPage extends StatefulWidget {
-  ListPage({Key key, this.title}) : super(key: key);
+class ResultsList extends StatefulWidget {
+  ResultsList({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _ListPageState createState() => _ListPageState();
+  _ResultsListState createState() => _ResultsListState();
 }
 
-class _ListPageState extends State<ListPage> {
-  List<GameResult> gameResults;
-
-  @override
-  void initState() {
-    fetchGameResults().then((result) {
-      setState(() {
-        gameResults = result;
-      });
-    });
-    super.initState();
-  }
+class _ResultsListState extends State<ResultsList> {
+  var defaultDivision = '2B';
+  var _gameResultsFuture;
 
   @override
   Widget build(BuildContext context) {
-    final topAppBar = AppBar(
-      elevation: 0.1,
-      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      title: Text(widget.title),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.list),
-          onPressed: () {},
-        )
-      ],
-    );
+    return FutureBuilder(
+        future: fetchGameResults(defaultDivision),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.data == null) {
+            return Center(child: Text("Loading..."));
+          } else {
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Card(
+                      elevation: 8.0,
+                      margin: new EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 6.0),
+                      child: Container(
+                          child: ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 10.0),
+                              leading: Container(
+                                  padding: EdgeInsets.only(right: 12.0),
+                                  decoration: new BoxDecoration(
+                                      border: new Border(
+                                          right: new BorderSide(width: 1.0))),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        new DateFormat('dd').format(snapshot
+                                            .data[index]
+                                            .date), //splittedDate[0],
+                                        style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.normal),
+                                      ),
+                                      Text(
+                                        new DateFormat('MM').format(snapshot
+                                            .data[index]
+                                            .date), //splittedDate[1],
+                                        style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.normal),
+                                      ),
+                                    ],
+                                  )),
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Container(
+                                      width: 100,
+                                      child: Text(
+                                        snapshot.data[index].home,
+                                        textAlign: TextAlign.left,
+                                        textWidthBasis: TextWidthBasis.parent,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.normal),
+                                      )),
+                                  Container(
+                                      width: 55,
+                                      child: Text(
+                                        snapshot.data[index].score,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      )),
+                                  Container(
+                                      width: 100,
+                                      child: Text(
+                                        snapshot.data[index].visitors,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.normal),
+                                      ))
+                                ],
+                              ))));
+                });
+          }
+        });
+  }
 
-    ListTile makeListTile(GameResult gameResult) => ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-        leading: Container(
-            padding: EdgeInsets.only(right: 12.0),
-            decoration: new BoxDecoration(
-                border: new Border(
-                    right: new BorderSide(width: 1.0, color: Colors.white24))),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  new DateFormat('dd').format(gameResult.date), //splittedDate[0],
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.normal),
-                ),
-                Text(
-                  new DateFormat('MM').format(gameResult.date), //splittedDate[1],
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.normal),
-                ),
-              ],
-            )),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Container(
-                width: 100,
-                child: Text(
-                  gameResult.home,
-                  textAlign: TextAlign.left,
-                  textWidthBasis: TextWidthBasis.parent,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.normal),
-                )),
-            Container(
-                width: 55,
-                child: Text(
-                  gameResult.score,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                )),
-            Container(
-                width: 100,
-                child: Text(
-                  gameResult.visitors,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.normal),
-                ))
-          ],
-        ));
-
-    Card makeCard(GameResult gameResult) => Card(
-          elevation: 8.0,
-          margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-          child: Container(
-            decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-            child: makeListTile(gameResult),
-          ),
-        );
-
-    final makeBody = Container(
-      child: ListView.builder(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        itemCount: gameResults.length,
-        itemBuilder: (BuildContext context, int index) {
-          return makeCard(gameResults[index]);
-        },
-      ),
-    );
-
-    return Scaffold(
-        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-        appBar: topAppBar,
-        body: makeBody);
+  Future<List<GameResult>> fetchGameResults(String division) async {
+    if (_gameResultsFuture != null) {
+      return _gameResultsFuture;
+    }
+    var secret = await secretFuture;
+    final response = await http.get(
+        'https://kzvb-datascraper.azurewebsites.net/api/results?code=' +
+            secret.resultsEndpointKey +
+            '&division=' +
+            division);
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON.
+      List responseJson = json.decode(response.body);
+      var gameResults =
+          responseJson.map((r) => GameResult.fromJson(r)).toList();
+      gameResults.sort((a, b) {
+        var adate = a.date;
+        var bdate = b.date;
+        return bdate.compareTo(
+            adate); //to get the order other way just switch `adate & bdate`
+      });
+      _gameResultsFuture = gameResults;
+      return gameResults;
+    } else {
+      // If that response was not OK, throw an error.
+      throw Exception('Failed to load game results.');
+    }
   }
 }
 
-Future<List<GameResult>> fetchGameResults() async {
-  final response = await http.get(
-      'https://kzvb-scraper.azurewebsites.net/api/results?code=V4HVAE88k211oy4rXrVdtaayBXMYGcyIi/6SYduVKY876q43b6Ekeg==&division=2B');
-  if (response.statusCode == 200) {
-    // If server returns an OK response, parse the JSON.
-    List responseJson = json.decode(response.body);
-    return responseJson.map((r) => GameResult.fromJson(r)).toList();
-  } else {
-    // If that response was not OK, throw an error.
-    throw Exception('Failed to load game results.');
+class RankingsList extends StatefulWidget {
+  RankingsList({Key key, this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  _RankingsListState createState() => _RankingsListState();
+}
+
+class _RankingsListState extends State<RankingsList> {
+  var defaultDivision = '2B';
+  var _rankingsFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: fetchRanking(defaultDivision),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.data == null) {
+            return Center(child: Text("Loading..."));
+          } else {
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Card(
+                      elevation: 8.0,
+                      margin: new EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 6.0),
+                      child: Container(
+                          child: ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 10.0),
+                              leading: Container(
+                                  padding: EdgeInsets.only(right: 12.0),
+                                  decoration: new BoxDecoration(
+                                      border: new Border(
+                                          right: new BorderSide(width: 1.0))),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        snapshot.data[index].rank,
+                                        style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.normal),
+                                      )
+                                    ],
+                                  )),
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Container(
+                                      width: 100,
+                                      child: Text(
+                                        snapshot.data[index].name,
+                                        textAlign: TextAlign.left,
+                                        textWidthBasis: TextWidthBasis.parent,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.normal),
+                                      )),
+                                  Container(
+                                      width: 55,
+                                      child: Text(
+                                        snapshot.data[index].points,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                      )),
+                                ],
+                              ))));
+                });
+          }
+        });
+  }
+
+  Future<List<Ranking>> fetchRanking(String division) async {
+    if (_rankingsFuture != null) {
+      return _rankingsFuture;
+    }
+    var secret = await secretFuture;
+    final response = await http.get(
+        'https://kzvb-datascraper.azurewebsites.net/api/ranking?code=' +
+            secret.rankingEndpointKey +
+            '&division=' +
+            division);
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON.
+      List responseJson = json.decode(response.body);
+      var rankings = responseJson.map((r) => Ranking.fromJson(r)).toList();
+      rankings.sort((a, b) {
+        var aRank = a.rank;
+        var bRank = b.rank;
+        return aRank.compareTo(bRank);
+      });
+      _rankingsFuture = rankings;
+      return rankings;
+    } else {
+      // If that response was not OK, throw an error.
+      throw Exception('Failed to load game rankings.');
+    }
   }
 }
