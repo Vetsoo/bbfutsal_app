@@ -175,6 +175,7 @@ class RankingsList extends StatefulWidget {
 
 class _RankingsListState extends State<RankingsList> {
   var defaultDivision = '2B';
+  var _rankingsFuture;
 
   @override
   Widget build(BuildContext context) {
@@ -240,28 +241,31 @@ class _RankingsListState extends State<RankingsList> {
           }
         });
   }
-}
 
-Future<List<Ranking>> fetchRanking(String division) async {
-  var secret = await secretFuture;
-  final response = await http.get(
-      'https://kzvb-datascraper.azurewebsites.net/api/ranking?code=' +
-          secret.rankingEndpointKey +
-          '&division=' +
-          division);
-  if (response.statusCode == 200) {
-    // If server returns an OK response, parse the JSON.
-    List responseJson = json.decode(response.body);
-    var gameResults = responseJson.map((r) => Ranking.fromJson(r)).toList();
-    gameResults.sort((a, b) {
-      var aRank = a.rank;
-      var bRank = b.rank;
-      return aRank.compareTo(bRank);
-    });
-
-    return gameResults;
-  } else {
-    // If that response was not OK, throw an error.
-    throw Exception('Failed to load game rankings.');
+  Future<List<Ranking>> fetchRanking(String division) async {
+    if (_rankingsFuture != null) {
+      return _rankingsFuture;
+    }
+    var secret = await secretFuture;
+    final response = await http.get(
+        'https://kzvb-datascraper.azurewebsites.net/api/ranking?code=' +
+            secret.rankingEndpointKey +
+            '&division=' +
+            division);
+    if (response.statusCode == 200) {
+      // If server returns an OK response, parse the JSON.
+      List responseJson = json.decode(response.body);
+      var rankings = responseJson.map((r) => Ranking.fromJson(r)).toList();
+      rankings.sort((a, b) {
+        var aRank = a.rank;
+        var bRank = b.rank;
+        return aRank.compareTo(bRank);
+      });
+      _rankingsFuture = rankings;
+      return rankings;
+    } else {
+      // If that response was not OK, throw an error.
+      throw Exception('Failed to load game rankings.');
+    }
   }
 }
