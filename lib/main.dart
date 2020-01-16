@@ -48,7 +48,8 @@ class ResultsList extends StatefulWidget {
   _ResultsListState createState() => _ResultsListState();
 }
 
-class _ResultsListState extends State<ResultsList> with AutomaticKeepAliveClientMixin<ResultsList> {
+class _ResultsListState extends State<ResultsList>
+    with AutomaticKeepAliveClientMixin<ResultsList> {
   var defaultDivision = '2B';
   Future<List<GameResult>> _gameResults;
 
@@ -71,79 +72,90 @@ class _ResultsListState extends State<ResultsList> with AutomaticKeepAliveClient
           if (snapshot.data == null) {
             return Center(child: Text("Loading..."));
           } else {
-            return ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Card(
-                      elevation: 8.0,
-                      margin: new EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 6.0),
-                      child: Container(
-                          child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 20.0, vertical: 10.0),
-                              leading: Container(
-                                  padding: EdgeInsets.only(right: 12.0),
-                                  decoration: new BoxDecoration(
-                                      border: new Border(
-                                          right: new BorderSide(width: 1.0))),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+            return RefreshIndicator(
+                onRefresh: refreshGameResults,
+                child: ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Card(
+                          elevation: 8.0,
+                          margin: new EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 6.0),
+                          child: Container(
+                              child: ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 20.0, vertical: 10.0),
+                                  leading: Container(
+                                      padding: EdgeInsets.only(right: 12.0),
+                                      decoration: new BoxDecoration(
+                                          border: new Border(
+                                              right:
+                                                  new BorderSide(width: 1.0))),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            new DateFormat('dd').format(snapshot
+                                                .data[index]
+                                                .date), //splittedDate[0],
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.normal),
+                                          ),
+                                          Text(
+                                            new DateFormat('MM').format(snapshot
+                                                .data[index]
+                                                .date), //splittedDate[1],
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.normal),
+                                          ),
+                                        ],
+                                      )),
+                                  title: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      Text(
-                                        new DateFormat('dd').format(snapshot
-                                            .data[index]
-                                            .date), //splittedDate[0],
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.normal),
-                                      ),
-                                      Text(
-                                        new DateFormat('MM').format(snapshot
-                                            .data[index]
-                                            .date), //splittedDate[1],
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.normal),
-                                      ),
+                                      Container(
+                                          width: 100,
+                                          child: Text(
+                                            snapshot.data[index].home,
+                                            textAlign: TextAlign.left,
+                                            textWidthBasis:
+                                                TextWidthBasis.parent,
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal),
+                                          )),
+                                      Container(
+                                          width: 55,
+                                          child: Text(
+                                            snapshot.data[index].score,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                      Container(
+                                          width: 100,
+                                          child: Text(
+                                            snapshot.data[index].visitors,
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal),
+                                          ))
                                     ],
-                                  )),
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Container(
-                                      width: 100,
-                                      child: Text(
-                                        snapshot.data[index].home,
-                                        textAlign: TextAlign.left,
-                                        textWidthBasis: TextWidthBasis.parent,
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.normal),
-                                      )),
-                                  Container(
-                                      width: 55,
-                                      child: Text(
-                                        snapshot.data[index].score,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold),
-                                      )),
-                                  Container(
-                                      width: 100,
-                                      child: Text(
-                                        snapshot.data[index].visitors,
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.normal),
-                                      ))
-                                ],
-                              ))));
-                });
+                                  ))));
+                    }));
           }
         });
+  }
+
+  Future refreshGameResults() async {
+    setState(() {
+      _gameResults = fetchGameResults(defaultDivision);
+    });
   }
 
   Future<List<GameResult>> fetchGameResults(String division) async {
@@ -181,7 +193,8 @@ class RankingsList extends StatefulWidget {
   _RankingsListState createState() => _RankingsListState();
 }
 
-class _RankingsListState extends State<RankingsList> with AutomaticKeepAliveClientMixin<RankingsList> {
+class _RankingsListState extends State<RankingsList>
+    with AutomaticKeepAliveClientMixin<RankingsList> {
   var defaultDivision = '2B';
   Future<List<Ranking>> _rankings;
 
@@ -203,61 +216,72 @@ class _RankingsListState extends State<RankingsList> with AutomaticKeepAliveClie
           if (snapshot.data == null) {
             return Center(child: Text("Loading..."));
           } else {
-            return ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Card(
-                      elevation: 8.0,
-                      margin: new EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 6.0),
-                      child: Container(
-                          child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 20.0, vertical: 10.0),
-                              leading: Container(
-                                  padding: EdgeInsets.only(right: 12.0),
-                                  decoration: new BoxDecoration(
-                                      border: new Border(
-                                          right: new BorderSide(width: 1.0))),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+            return RefreshIndicator(
+                onRefresh: refreshRanking,
+                child: ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Card(
+                          elevation: 8.0,
+                          margin: new EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 6.0),
+                          child: Container(
+                              child: ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 20.0, vertical: 10.0),
+                                  leading: Container(
+                                      padding: EdgeInsets.only(right: 12.0),
+                                      decoration: new BoxDecoration(
+                                          border: new Border(
+                                              right:
+                                                  new BorderSide(width: 1.0))),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            snapshot.data[index].rank,
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.normal),
+                                          )
+                                        ],
+                                      )),
+                                  title: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      Text(
-                                        snapshot.data[index].rank,
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.normal),
-                                      )
+                                      Container(
+                                          width: 100,
+                                          child: Text(
+                                            snapshot.data[index].name,
+                                            textAlign: TextAlign.left,
+                                            textWidthBasis:
+                                                TextWidthBasis.parent,
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal),
+                                          )),
+                                      Container(
+                                          width: 55,
+                                          child: Text(
+                                            snapshot.data[index].points,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold),
+                                          )),
                                     ],
-                                  )),
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Container(
-                                      width: 100,
-                                      child: Text(
-                                        snapshot.data[index].name,
-                                        textAlign: TextAlign.left,
-                                        textWidthBasis: TextWidthBasis.parent,
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.normal),
-                                      )),
-                                  Container(
-                                      width: 55,
-                                      child: Text(
-                                        snapshot.data[index].points,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold),
-                                      )),
-                                ],
-                              ))));
-                });
+                                  ))));
+                    }));
           }
         });
+  }
+
+  Future refreshRanking() async {
+    setState(() {
+      _rankings = fetchRanking(defaultDivision);
+    });
   }
 
   Future<List<Ranking>> fetchRanking(String division) async {
