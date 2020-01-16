@@ -16,26 +16,41 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-        title: 'KZVB App',
-        theme: new ThemeData(primaryColor: Colors.deepOrange),
-        home: DefaultTabController(
-          length: 2,
-          child: SafeArea(
-              child: Scaffold(
-            appBar: AppBar(
-              bottom: TabBar(
-                tabs: <Widget>[Tab(text: "Results"), Tab(text: "Ranking")],
-              ),
-              title: Text("KZVB App"),
+      title: 'KZVB App',
+      theme: new ThemeData(primaryColor: Colors.deepOrange),
+      home: SafeArea(
+          child: Scaffold(
+        appBar: AppBar(
+          title: Text("KZVB App"),
+        ),
+        body: Column(children: [
+          Container(
+              color: Colors.orangeAccent,
+              height: 150.0,
+              child: Center(child: Text('Something'))),
+          DefaultTabController(
+            length: 2,
+            initialIndex: 0,
+            child: Expanded(
+              child: Column(children: [
+                TabBar(
+                  tabs: [Tab(text: "Results"), Tab(text: "Ranking")],
+                  labelColor: Colors.black,
+                ),
+                Expanded(
+                                  child: TabBarView(
+                    children: [
+                      new ResultsList(title: 'Results'),
+                      new RankingsList(title: 'Ranking'),
+                    ],
+                  ),
+                ),
+              ]),
             ),
-            body: TabBarView(
-              children: <Widget>[
-                new ResultsList(title: 'Results'),
-                new RankingsList(title: 'Ranking'),
-              ],
-            ),
-          )),
-        ));
+          ),
+        ]),
+      )),
+    );
   }
 }
 
@@ -181,6 +196,62 @@ class _ResultsListState extends State<ResultsList>
       // If that response was not OK, throw an error.
       throw Exception('Failed to load game results.');
     }
+  }
+}
+
+class FilterGlance extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.fromLTRB(10.0, 10.0, 5, 0),
+          child: Text("FILTER",
+              style: TextStyle(
+                  color: Colors.white30, fontWeight: FontWeight.bold)),
+        ),
+        Container(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            verticalDirection: VerticalDirection.down,
+            runSpacing: 3.0,
+            spacing: 3.0,
+            children: <Widget>[
+              ChipDesign("Lifetime"),
+              ChipDesign("Student"),
+              ChipDesign("Salaried"),
+              ChipDesign("Corporate"),
+              ChipDesign("Open"),
+              ChipDesign("My Referral Code Users"),
+              ChipDesign("+10"),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ChipDesign extends StatelessWidget {
+  final String _label;
+
+  ChipDesign(this._label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Chip(
+        label: Text(
+          _label,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepOrange,
+        padding: EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 0.0),
+      ),
+      margin: EdgeInsets.only(left: 10, right: 3, top: 0, bottom: 0),
+    );
   }
 }
 
