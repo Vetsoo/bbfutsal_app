@@ -48,14 +48,25 @@ class ResultsList extends StatefulWidget {
   _ResultsListState createState() => _ResultsListState();
 }
 
-class _ResultsListState extends State<ResultsList> {
+class _ResultsListState extends State<ResultsList> with AutomaticKeepAliveClientMixin<ResultsList> {
   var defaultDivision = '2B';
-  var _gameResultsFuture;
+  Future<List<GameResult>> _gameResults;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    _gameResults =
+        fetchGameResults(defaultDivision); // only create the future once.
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // because we use the keep alive mixin.
     return FutureBuilder(
-        future: fetchGameResults(defaultDivision),
+        future: _gameResults,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.data == null) {
             return Center(child: Text("Loading..."));
@@ -136,9 +147,6 @@ class _ResultsListState extends State<ResultsList> {
   }
 
   Future<List<GameResult>> fetchGameResults(String division) async {
-    if (_gameResultsFuture != null) {
-      return _gameResultsFuture;
-    }
     var secret = await secretFuture;
     final response = await http.get(
         'https://kzvb-datascraper.azurewebsites.net/api/results?code=' +
@@ -156,7 +164,6 @@ class _ResultsListState extends State<ResultsList> {
         return bdate.compareTo(
             adate); //to get the order other way just switch `adate & bdate`
       });
-      _gameResultsFuture = gameResults;
       return gameResults;
     } else {
       // If that response was not OK, throw an error.
@@ -174,14 +181,24 @@ class RankingsList extends StatefulWidget {
   _RankingsListState createState() => _RankingsListState();
 }
 
-class _RankingsListState extends State<RankingsList> {
+class _RankingsListState extends State<RankingsList> with AutomaticKeepAliveClientMixin<RankingsList> {
   var defaultDivision = '2B';
-  var _rankingsFuture;
+  Future<List<Ranking>> _rankings;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    _rankings = fetchRanking(defaultDivision); // only create the future once.
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // because we use the keep alive mixin.
     return FutureBuilder(
-        future: fetchRanking(defaultDivision),
+        future: _rankings,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.data == null) {
             return Center(child: Text("Loading..."));
@@ -244,9 +261,6 @@ class _RankingsListState extends State<RankingsList> {
   }
 
   Future<List<Ranking>> fetchRanking(String division) async {
-    if (_rankingsFuture != null) {
-      return _rankingsFuture;
-    }
     var secret = await secretFuture;
     final response = await http.get(
         'https://kzvb-datascraper.azurewebsites.net/api/ranking?code=' +
@@ -262,7 +276,6 @@ class _RankingsListState extends State<RankingsList> {
         var bRank = b.rank;
         return aRank.compareTo(bRank);
       });
-      _rankingsFuture = rankings;
       return rankings;
     } else {
       // If that response was not OK, throw an error.
