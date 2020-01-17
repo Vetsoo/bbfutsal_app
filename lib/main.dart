@@ -16,41 +16,75 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'KZVB App',
-      theme: new ThemeData(primaryColor: Colors.deepOrange),
-      home: SafeArea(
-          child: Scaffold(
-        appBar: AppBar(
-          title: Text("KZVB App"),
-        ),
-        body: Column(children: [
-          Container(
-              color: Colors.orangeAccent,
-              height: 150.0,
-              child: Center(child: Text('Something'))),
-          DefaultTabController(
-            length: 2,
-            initialIndex: 0,
-            child: Expanded(
-              child: Column(children: [
-                TabBar(
-                  tabs: [Tab(text: "Results"), Tab(text: "Ranking")],
-                  labelColor: Colors.black,
-                ),
-                Expanded(
-                                  child: TabBarView(
-                    children: [
-                      new ResultsList(title: 'Results'),
-                      new RankingsList(title: 'Ranking'),
-                    ],
+        title: 'KZVB App',
+        theme: new ThemeData(primaryColor: Colors.deepOrange),
+        home: HomeScreen());
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _value = '2B';
+  var division = ['1A', '2A', '2B', '3A', '3B', '3C'];
+
+  GlobalKey<ResultsListState> _keyResultsList = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+        child: Scaffold(
+      appBar: AppBar(
+        title: Text("KZVB App"),
+      ),
+      body: Column(children: [
+        Container(
+            color: Colors.orangeAccent,
+            height: 75.0,
+            child: ListView(scrollDirection: Axis.horizontal, children: [
+              for (var division in division)
+                Container(
+                  child: ChoiceChip(
+                    label: Text("$division",
+                        style: TextStyle(color: Colors.black, fontSize: 21)),
+                    selected: _value == division,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        _value = selected ? division : null;
+                        _keyResultsList.currentState.refreshGameResults(_value);
+                      });
+                    },
+                    padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
                   ),
+                  margin:
+                      EdgeInsets.only(left: 10, right: 3, top: 0, bottom: 0),
+                )
+            ])),
+        DefaultTabController(
+          length: 2,
+          initialIndex: 0,
+          child: Expanded(
+            child: Column(children: [
+              TabBar(
+                tabs: [Tab(text: "Results"), Tab(text: "Ranking")],
+                labelColor: Colors.black,
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    new ResultsList(title: 'Results', key: _keyResultsList),
+                    new RankingsList(title: 'Ranking'),
+                  ],
                 ),
-              ]),
-            ),
+              ),
+            ]),
           ),
-        ]),
-      )),
-    );
+        ),
+      ]),
+    ));
   }
 }
 
@@ -60,10 +94,10 @@ class ResultsList extends StatefulWidget {
   final String title;
 
   @override
-  _ResultsListState createState() => _ResultsListState();
+  ResultsListState createState() => ResultsListState();
 }
 
-class _ResultsListState extends State<ResultsList>
+class ResultsListState extends State<ResultsList>
     with AutomaticKeepAliveClientMixin<ResultsList> {
   var defaultDivision = '2B';
   Future<List<GameResult>> _gameResults;
@@ -88,7 +122,7 @@ class _ResultsListState extends State<ResultsList>
             return Center(child: Text("Loading..."));
           } else {
             return RefreshIndicator(
-                onRefresh: refreshGameResults,
+                onRefresh: onRefreshGameResults,
                 child: ListView.builder(
                     itemCount: snapshot.data.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -167,7 +201,13 @@ class _ResultsListState extends State<ResultsList>
         });
   }
 
-  Future refreshGameResults() async {
+  Future refreshGameResults(String division) async {
+    setState(() {
+      _gameResults = fetchGameResults(division);
+    });
+  }
+
+    Future onRefreshGameResults() async {
     setState(() {
       _gameResults = fetchGameResults(defaultDivision);
     });
