@@ -29,9 +29,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _value = '2B';
-  var division = ['1A', '2A', '2B', '3A', '3B', '3C'];
+  var division = ['01', '2A', '2B', '3A', '3B', '3C'];
 
   GlobalKey<ResultsListState> _keyResultsList = GlobalKey();
+  GlobalKey<RankingsListState> _keyRankingsList = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       setState(() {
                         _value = selected ? division : null;
                         _keyResultsList.currentState.refreshGameResults(_value);
+                        _keyRankingsList.currentState.refreshRanking(_value);
                       });
                     },
                     padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
@@ -76,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: TabBarView(
                   children: [
                     new ResultsList(title: 'Results', key: _keyResultsList),
-                    new RankingsList(title: 'Ranking'),
+                    new RankingsList(title: 'Ranking', key: _keyRankingsList),
                   ],
                 ),
               ),
@@ -207,7 +209,7 @@ class ResultsListState extends State<ResultsList>
     });
   }
 
-    Future onRefreshGameResults() async {
+  Future onRefreshGameResults() async {
     setState(() {
       _gameResults = fetchGameResults(defaultDivision);
     });
@@ -301,10 +303,10 @@ class RankingsList extends StatefulWidget {
   final String title;
 
   @override
-  _RankingsListState createState() => _RankingsListState();
+  RankingsListState createState() => RankingsListState();
 }
 
-class _RankingsListState extends State<RankingsList>
+class RankingsListState extends State<RankingsList>
     with AutomaticKeepAliveClientMixin<RankingsList> {
   var defaultDivision = '2B';
   Future<List<Ranking>> _rankings;
@@ -328,7 +330,7 @@ class _RankingsListState extends State<RankingsList>
             return Center(child: Text("Loading..."));
           } else {
             return RefreshIndicator(
-                onRefresh: refreshRanking,
+                onRefresh: onRefreshRanking,
                 child: ListView.builder(
                     itemCount: snapshot.data.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -389,7 +391,13 @@ class _RankingsListState extends State<RankingsList>
         });
   }
 
-  Future refreshRanking() async {
+  Future refreshRanking(String division) async {
+    setState(() {
+      _rankings = fetchRanking(division);
+    });
+  }
+
+    Future onRefreshRanking() async {
     setState(() {
       _rankings = fetchRanking(defaultDivision);
     });
