@@ -18,24 +18,80 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
         title: 'KZVB App',
         theme: new ThemeData(primaryColor: Colors.deepOrange),
-        home: DefaultTabController(
+        home: HomeScreen());
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _selectedDivision = '2B';
+  var division = ['01', '2A', '2B', '3A', '3B', '3C'];
+
+  GlobalKey<ResultsListState> _keyResultsList = GlobalKey();
+  GlobalKey<RankingsListState> _keyRankingsList = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+        child: Scaffold(
+      appBar: AppBar(
+        title: Text("KZVB Uitslagen & rangschikking"),
+      ),
+      body: Column(children: [
+        Container(
+            //color: Colors.deepOrange,
+            height: 75.0,
+            child: ListView(scrollDirection: Axis.horizontal, children: [
+              for (var division in division)
+                Container(
+                  child: ChoiceChip(
+                    label: Text("$division",
+                        style: TextStyle(color: Colors.black, fontSize: 21)),
+                    selected: _selectedDivision == division,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        _selectedDivision = division;
+                        _keyResultsList.currentState.selectedDivision =
+                            _selectedDivision;
+                        _keyRankingsList.currentState.selectedDivision =
+                            _selectedDivision;
+                        _keyResultsList.currentState.refreshGameResults();
+                        _keyRankingsList.currentState.refreshRanking();
+                      });
+                    },
+                    selectedColor: Colors.deepOrange,
+                    padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+                  ),
+                  margin:
+                      EdgeInsets.only(left: 10, right: 3, top: 0, bottom: 0),
+                )
+            ])),
+        DefaultTabController(
           length: 2,
-          child: SafeArea(
-              child: Scaffold(
-            appBar: AppBar(
-              bottom: TabBar(
-                tabs: <Widget>[Tab(text: "Results"), Tab(text: "Ranking")],
+          initialIndex: 0,
+          child: Expanded(
+            child: Column(children: [
+              TabBar(
+                tabs: [Tab(text: "Uitslagen"), Tab(text: "Rangschikking")],
+                labelColor: Colors.black,
               ),
-              title: Text("KZVB App"),
-            ),
-            body: TabBarView(
-              children: <Widget>[
-                new ResultsList(title: 'Results'),
-                new RankingsList(title: 'Ranking'),
-              ],
-            ),
-          )),
-        ));
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    new ResultsList(title: 'Results', key: _keyResultsList),
+                    new RankingsList(title: 'Ranking', key: _keyRankingsList),
+                  ],
+                ),
+              ),
+            ]),
+          ),
+        ),
+      ]),
+    ));
   }
 }
 
@@ -45,12 +101,12 @@ class ResultsList extends StatefulWidget {
   final String title;
 
   @override
-  _ResultsListState createState() => _ResultsListState();
+  ResultsListState createState() => ResultsListState();
 }
 
-class _ResultsListState extends State<ResultsList>
+class ResultsListState extends State<ResultsList>
     with AutomaticKeepAliveClientMixin<ResultsList> {
-  var defaultDivision = '2B';
+  var selectedDivision = '2B';
   Future<List<GameResult>> _gameResults;
 
   @override
@@ -59,7 +115,7 @@ class _ResultsListState extends State<ResultsList>
   @override
   void initState() {
     _gameResults =
-        fetchGameResults(defaultDivision); // only create the future once.
+        fetchGameResults(selectedDivision); // only create the future once.
     super.initState();
   }
 
@@ -154,7 +210,7 @@ class _ResultsListState extends State<ResultsList>
 
   Future refreshGameResults() async {
     setState(() {
-      _gameResults = fetchGameResults(defaultDivision);
+      _gameResults = fetchGameResults(selectedDivision);
     });
   }
 
@@ -190,12 +246,12 @@ class RankingsList extends StatefulWidget {
   final String title;
 
   @override
-  _RankingsListState createState() => _RankingsListState();
+  RankingsListState createState() => RankingsListState();
 }
 
-class _RankingsListState extends State<RankingsList>
+class RankingsListState extends State<RankingsList>
     with AutomaticKeepAliveClientMixin<RankingsList> {
-  var defaultDivision = '2B';
+  var selectedDivision = '2B';
   Future<List<Ranking>> _rankings;
 
   @override
@@ -203,7 +259,7 @@ class _RankingsListState extends State<RankingsList>
 
   @override
   void initState() {
-    _rankings = fetchRanking(defaultDivision); // only create the future once.
+    _rankings = fetchRanking(selectedDivision); // only create the future once.
     super.initState();
   }
 
@@ -280,7 +336,7 @@ class _RankingsListState extends State<RankingsList>
 
   Future refreshRanking() async {
     setState(() {
-      _rankings = fetchRanking(defaultDivision);
+      _rankings = fetchRanking(selectedDivision);
     });
   }
 
