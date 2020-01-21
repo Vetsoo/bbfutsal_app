@@ -28,7 +28,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _value = '2B';
+  String _selectedDivision = '2B';
   var division = ['01', '2A', '2B', '3A', '3B', '3C'];
 
   GlobalKey<ResultsListState> _keyResultsList = GlobalKey();
@@ -39,11 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title: Text("KZVB App"),
+        title: Text("KZVB Uitslagen & rangschikking"),
       ),
       body: Column(children: [
         Container(
-            color: Colors.orangeAccent,
+            //color: Colors.deepOrange,
             height: 75.0,
             child: ListView(scrollDirection: Axis.horizontal, children: [
               for (var division in division)
@@ -51,14 +51,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ChoiceChip(
                     label: Text("$division",
                         style: TextStyle(color: Colors.black, fontSize: 21)),
-                    selected: _value == division,
+                    selected: _selectedDivision == division,
                     onSelected: (bool selected) {
                       setState(() {
-                        _value = selected ? division : null;
-                        _keyResultsList.currentState.refreshGameResults(_value);
-                        _keyRankingsList.currentState.refreshRanking(_value);
+                        _selectedDivision = division;
+                        _keyResultsList.currentState.selectedDivision =
+                            _selectedDivision;
+                        _keyRankingsList.currentState.selectedDivision =
+                            _selectedDivision;
+                        _keyResultsList.currentState.refreshGameResults();
+                        _keyRankingsList.currentState.refreshRanking();
                       });
                     },
+                    selectedColor: Colors.deepOrange,
                     padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
                   ),
                   margin:
@@ -71,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Expanded(
             child: Column(children: [
               TabBar(
-                tabs: [Tab(text: "Results"), Tab(text: "Ranking")],
+                tabs: [Tab(text: "Uitslagen"), Tab(text: "Rangschikking")],
                 labelColor: Colors.black,
               ),
               Expanded(
@@ -101,7 +106,7 @@ class ResultsList extends StatefulWidget {
 
 class ResultsListState extends State<ResultsList>
     with AutomaticKeepAliveClientMixin<ResultsList> {
-  var defaultDivision = '2B';
+  var selectedDivision = '2B';
   Future<List<GameResult>> _gameResults;
 
   @override
@@ -110,7 +115,7 @@ class ResultsListState extends State<ResultsList>
   @override
   void initState() {
     _gameResults =
-        fetchGameResults(defaultDivision); // only create the future once.
+        fetchGameResults(selectedDivision); // only create the future once.
     super.initState();
   }
 
@@ -124,7 +129,7 @@ class ResultsListState extends State<ResultsList>
             return Center(child: Text("Loading..."));
           } else {
             return RefreshIndicator(
-                onRefresh: onRefreshGameResults,
+                onRefresh: refreshGameResults,
                 child: ListView.builder(
                     itemCount: snapshot.data.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -203,15 +208,9 @@ class ResultsListState extends State<ResultsList>
         });
   }
 
-  Future refreshGameResults(String division) async {
+  Future refreshGameResults() async {
     setState(() {
-      _gameResults = fetchGameResults(division);
-    });
-  }
-
-  Future onRefreshGameResults() async {
-    setState(() {
-      _gameResults = fetchGameResults(defaultDivision);
+      _gameResults = fetchGameResults(selectedDivision);
     });
   }
 
@@ -241,62 +240,6 @@ class ResultsListState extends State<ResultsList>
   }
 }
 
-class FilterGlance extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.fromLTRB(10.0, 10.0, 5, 0),
-          child: Text("FILTER",
-              style: TextStyle(
-                  color: Colors.white30, fontWeight: FontWeight.bold)),
-        ),
-        Container(
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            verticalDirection: VerticalDirection.down,
-            runSpacing: 3.0,
-            spacing: 3.0,
-            children: <Widget>[
-              ChipDesign("Lifetime"),
-              ChipDesign("Student"),
-              ChipDesign("Salaried"),
-              ChipDesign("Corporate"),
-              ChipDesign("Open"),
-              ChipDesign("My Referral Code Users"),
-              ChipDesign("+10"),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ChipDesign extends StatelessWidget {
-  final String _label;
-
-  ChipDesign(this._label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Chip(
-        label: Text(
-          _label,
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.deepOrange,
-        padding: EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 0.0),
-      ),
-      margin: EdgeInsets.only(left: 10, right: 3, top: 0, bottom: 0),
-    );
-  }
-}
-
 class RankingsList extends StatefulWidget {
   RankingsList({Key key, this.title}) : super(key: key);
 
@@ -308,7 +251,7 @@ class RankingsList extends StatefulWidget {
 
 class RankingsListState extends State<RankingsList>
     with AutomaticKeepAliveClientMixin<RankingsList> {
-  var defaultDivision = '2B';
+  var selectedDivision = '2B';
   Future<List<Ranking>> _rankings;
 
   @override
@@ -316,7 +259,7 @@ class RankingsListState extends State<RankingsList>
 
   @override
   void initState() {
-    _rankings = fetchRanking(defaultDivision); // only create the future once.
+    _rankings = fetchRanking(selectedDivision); // only create the future once.
     super.initState();
   }
 
@@ -330,7 +273,7 @@ class RankingsListState extends State<RankingsList>
             return Center(child: Text("Loading..."));
           } else {
             return RefreshIndicator(
-                onRefresh: onRefreshRanking,
+                onRefresh: refreshRanking,
                 child: ListView.builder(
                     itemCount: snapshot.data.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -391,15 +334,9 @@ class RankingsListState extends State<RankingsList>
         });
   }
 
-  Future refreshRanking(String division) async {
+  Future refreshRanking() async {
     setState(() {
-      _rankings = fetchRanking(division);
-    });
-  }
-
-    Future onRefreshRanking() async {
-    setState(() {
-      _rankings = fetchRanking(defaultDivision);
+      _rankings = fetchRanking(selectedDivision);
     });
   }
 
