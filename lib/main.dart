@@ -55,12 +55,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     onSelected: (bool selected) {
                       setState(() {
                         _selectedDivision = division;
-                        _keyResultsList.currentState.selectedDivision =
-                            _selectedDivision;
-                        _keyRankingsList.currentState.selectedDivision =
-                            _selectedDivision;
-                        _keyResultsList.currentState.refreshGameResults();
-                        _keyRankingsList.currentState.refreshRanking();
+                        if (_keyResultsList.currentState != null) {
+                          _keyResultsList.currentState.selectedDivision =
+                              _selectedDivision;
+                          _keyResultsList.currentState.refreshGameResults();
+                        }
+                        if (_keyRankingsList.currentState != null) {
+                          _keyRankingsList.currentState.selectedDivision =
+                              _selectedDivision;
+                          _keyRankingsList.currentState.refreshRanking();
+                        }
                       });
                     },
                     selectedColor: Colors.deepOrange,
