@@ -54,16 +54,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     selected: _selectedDivision == division,
                     onSelected: (bool selected) {
                       setState(() {
-                        _selectedDivision = division;
-                        if (_keyResultsList.currentState != null) {
-                          _keyResultsList.currentState.selectedDivision =
-                              _selectedDivision;
-                          _keyResultsList.currentState.refreshGameResults();
-                        }
-                        if (_keyRankingsList.currentState != null) {
-                          _keyRankingsList.currentState.selectedDivision =
-                              _selectedDivision;
-                          _keyRankingsList.currentState.refreshRanking();
+                        if (_selectedDivision != division) {
+                          _selectedDivision = division;
+                          if (_keyResultsList.currentState != null) {
+                            _keyResultsList.currentState.selectedDivision =
+                                _selectedDivision;
+                            _keyResultsList.currentState.refreshGameResults();
+                          }
+                          if (_keyRankingsList.currentState != null) {
+                            _keyRankingsList.currentState.selectedDivision =
+                                _selectedDivision;
+                            _keyRankingsList.currentState.refreshRanking();
+                          }
                         }
                       });
                     },
@@ -129,8 +131,10 @@ class ResultsListState extends State<ResultsList>
     return FutureBuilder(
         future: _gameResults,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.data == null) {
-            return Center(child: Text("Loading..."));
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return new Center(
+              child: new CircularProgressIndicator(),
+            );
           } else {
             return RefreshIndicator(
                 onRefresh: refreshGameResults,
@@ -273,8 +277,10 @@ class RankingsListState extends State<RankingsList>
     return FutureBuilder(
         future: _rankings,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.data == null) {
-            return Center(child: Text("Loading..."));
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return new Center(
+              child: new CircularProgressIndicator(),
+            );
           } else {
             return RefreshIndicator(
                 onRefresh: refreshRanking,
