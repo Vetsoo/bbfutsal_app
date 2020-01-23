@@ -7,6 +7,6 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/splash_soccer" />
+            android:src="@drawable/ic_kzvb_splash" />
     </item>
 </layer-list>

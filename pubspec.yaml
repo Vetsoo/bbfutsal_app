@@ -35,7 +35,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "icon/ic_soccer.png"
+  image_path: "icon/ic_kzvb.png"
 
 
 # For information on the generic Dart part of this file, see the
