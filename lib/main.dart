@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                       });
                     },
-                    selectedColor: Colors.deepOrange,
+                    selectedColor: Colors.deepOrange[400],
                     padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
                   ),
                   margin:
