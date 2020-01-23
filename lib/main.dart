@@ -318,7 +318,6 @@ class RankingsListState extends State<RankingsList>
                                         MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       Container(
-                                          width: 100,
                                           child: Text(
                                             snapshot.data[index].name,
                                             textAlign: TextAlign.left,
