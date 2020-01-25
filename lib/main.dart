@@ -88,8 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: TabBarView(
                   children: [
-                    new ResultsList(title: 'Results', key: _keyResultsList),
-                    new RankingsList(title: 'Ranking', key: _keyRankingsList),
+                    new ResultsList(
+                        title: 'Results',
+                        key: _keyResultsList,
+                        selectedDivision: _selectedDivision),
+                    new RankingsList(
+                        title: 'Ranking',
+                        key: _keyRankingsList,
+                        selectedDivision: _selectedDivision),
                   ],
                 ),
               ),
@@ -102,17 +108,21 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class ResultsList extends StatefulWidget {
-  ResultsList({Key key, this.title}) : super(key: key);
+  ResultsList({Key key, this.title, this.selectedDivision}) : super(key: key);
 
   final String title;
+  final String selectedDivision;
 
   @override
-  ResultsListState createState() => ResultsListState();
+  ResultsListState createState() =>
+      ResultsListState(selectedDivision: selectedDivision);
 }
 
 class ResultsListState extends State<ResultsList>
     with AutomaticKeepAliveClientMixin<ResultsList> {
-  var selectedDivision = '2B';
+  ResultsListState({this.selectedDivision});
+
+  String selectedDivision;
   Future<List<GameResult>> _gameResults;
 
   @override
@@ -249,17 +259,19 @@ class ResultsListState extends State<ResultsList>
 }
 
 class RankingsList extends StatefulWidget {
-  RankingsList({Key key, this.title}) : super(key: key);
+  RankingsList({Key key, this.title, this.selectedDivision}) : super(key: key);
 
+  final String selectedDivision;
   final String title;
 
   @override
-  RankingsListState createState() => RankingsListState();
+  RankingsListState createState() => RankingsListState(selectedDivision: selectedDivision);
 }
 
 class RankingsListState extends State<RankingsList>
     with AutomaticKeepAliveClientMixin<RankingsList> {
-  var selectedDivision = '2B';
+      RankingsListState({this.selectedDivision});
+  String selectedDivision;
   Future<List<Ranking>> _rankings;
 
   @override
@@ -319,14 +331,13 @@ class RankingsListState extends State<RankingsList>
                                     children: <Widget>[
                                       Container(
                                           child: Text(
-                                            snapshot.data[index].name,
-                                            textAlign: TextAlign.left,
-                                            textWidthBasis:
-                                                TextWidthBasis.parent,
-                                            style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.normal),
-                                          )),
+                                        snapshot.data[index].name,
+                                        textAlign: TextAlign.left,
+                                        textWidthBasis: TextWidthBasis.parent,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.normal),
+                                      )),
                                       Container(
                                           width: 55,
                                           child: Text(
