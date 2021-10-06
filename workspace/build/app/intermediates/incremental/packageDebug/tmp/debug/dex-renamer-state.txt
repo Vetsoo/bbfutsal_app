@@ -1,0 +1,4 @@
+#Wed Oct 06 18:03:07 CEST 2021
+base.0=/home/developer/workspace/build/app/intermediates/transforms/dexMerger/debug/0
+path.0=classes.dex
+renamed.0=classes.dex
